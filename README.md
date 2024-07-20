@@ -2,7 +2,7 @@
     <img src='test/logo.jpg'>
 </p>
 
-# golden_retrieval
+# 🦮 Golden Retrieval
 
 ## Introduction
 Golden retrieval is ~~
@@ -29,8 +29,9 @@ Please refer to [INSTALL.md](docs/INSTALL.md) for detail installation
 Please refer to [GETTING_STARTED.md](docs/GETTING_STARTED.md) for the basic usage of Golden Retrieval.
 
 ## TODO
-- [ ] 
-- [x]
+- 🟩 R-MAC
+- 🟩 Triplet Loss
+- ✅ Registry Pattern
 
 
 ## License
