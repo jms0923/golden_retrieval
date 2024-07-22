@@ -13,4 +13,4 @@ class Registry(dict):
         
     def register(self, module):
         _register_generic(self, module.__name__, module)
-        return module 
+        return module
