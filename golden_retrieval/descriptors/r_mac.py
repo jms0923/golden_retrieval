@@ -1,17 +1,19 @@
 import torch
+from torch import nn
 import numpy as np
 
 from ..registry import DESCRIPTORS
 
 
 @DESCRIPTORS.register
-class RMAC():
+class RMAC(nn.Module):
     """
     Regional Maximum activation of convolutions (R-MAC).
     c.f. https://arxiv.org/pdf/1511.05879.pdf
     """
     
     def __init__(self, input_shape) -> None:
+        super().__init__()
         self.iou_target: float = 0.4
         self.levels: int = 3
         self.regions: list = self.__get_regions(input_shape)
@@ -24,7 +26,8 @@ class RMAC():
         List[List[int, int, int, int]]: Regions (start_y, start_x, end_y, end_x).
     """
     def __get_regions(self, input_shape: 'list[int, int, int, int]') -> 'list[list[int, int, int, int]]':
-        _, inp_height, inp_width, _ = input_shape
+        _, _, inp_height, inp_width = input_shape
+        min_edge = inp_height
         n_h, n_w = 1, 1
         if inp_height != inp_width:
             min_edge = min(inp_height, inp_width)
@@ -54,6 +57,18 @@ class RMAC():
         
         return regions
     
-    def __call__(self) -> None:
-        pass
+    def forward(self, feature)-> 'torch.Tensor':
+        final_feature = None
+        for region in self.regions:
+            region_feature = (feature[:, :, region[0]:region[2], region[1]:region[3]].max(dim=3)[0])
+            region_feature = region_feature.max(dim=2)[0]
+            region_feature = region_feature / torch.norm(region_feature, dim=1, keepdim=True)
+            if final_feature is None:
+                final_feature = region_feature
+            else:
+                final_feature = final_feature + region_feature
+        
+        return final_feature
     
+    def __repr__(self):
+        return self.__class__.__name__ + '()'
