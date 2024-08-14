@@ -5,31 +5,12 @@ import torch
 from utils import pil_loader, default_loader, cid2filename
 
 
-class TrainDataset(torch.utils.data.Dataset):
-    def __init__(self, dataroot, mode, name, imsize=None, loader=default_loader):
+class TupleDataset(torch.utils.data.Dataset):
+    def __init__(self, dataroot, mode, name, imsize=None,
+                neg_num=5, query_size=2000, pool_size=20000,
+                transfrom=None, loader=default_loader):
         db_root = os.path.join(dataroot, 'train', name)
         img_root = os.path.join(db_root, 'ims')
-
-        '''
-        pickle format
-        db =
-        {
-            'val' =
-            {
-                'cids' = [],
-                'qidxs' = [],
-                'pidxs' = [],
-                'cluster' = []
-            },
-            'train' =
-            {
-                'cids' = [],
-                'qidxs' = [],
-                'pidxs' = [],
-                'cluster' = []
-            }
-        }
-        '''
         pkl_path = os.path.join(db_root, '{}.pkl'.format(name))
         with open(pkl_path, 'rb') as f:
             db = pickle.load(f)
@@ -44,10 +25,35 @@ class TrainDataset(torch.utils.data.Dataset):
         self.ppool = db['pidxs']
         self.loader = default_loader
 
+        self.neg_num = neg_num
+        self.query_size = min(query_size, len(self.qpool))
+        self.pool_size = min(pool_size, len(self.images))
+
     def __len__(self):
-        return self.X.shape[0]
+        return self.query_size
 
     def __getitem__(self, idx):
         return self.X[idx], self.Y[idx]
     
-testdb = TrainDataset('/home/jo/develop/golden_retrieval/dataset', 'train', 'retrieval-SfM-120k')
+    
+# testdb = TrainDataset('/home/jo/develop/golden_retrieval/dataset', 'train', 'retrieval-SfM-120k')
+'''
+pickle format
+db =
+{
+    'val' =
+    {
+        'cids' = [],
+        'qidxs' = [],
+        'pidxs' = [],
+        'cluster' = []
+    },
+    'train' =
+    {
+        'cids' = [],
+        'qidxs' = [],
+        'pidxs' = [],
+        'cluster' = []
+    }
+}
+'''
